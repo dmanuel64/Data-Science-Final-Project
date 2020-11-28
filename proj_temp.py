@@ -68,9 +68,29 @@ def preprocessStormData(stormFrame, keepColumns=None, additionalColumns=None):
         if stormFrame[column].dtype == 'object':
             stormFrame[column] = stormFrame[column].str.upper()
 
+def loadMultiCSVs(*fileNames):
+    '''
+    Loads multiple .csv files and merges the result into one DataFrame using 
+    a left outer join.
+
+    Parameters
+    ----------
+    *fileNames : varying strings
+        List of .csv file names to load.
+
+    Returns
+    -------
+    df : DataFrame
+        DataFrame containing all the loaded .csv files.
+
+    '''
+    df = pd.DataFrame() # DataFrame containing all the csv files
+    
+    for fileName in fileNames:
+        df = pd.join(pd.read_csv(fileName))
+    return df
+
 if __name__ == '__main__':
     stormData = pd.read_csv('storm_data.csv')
     preprocessStormData(stormData)
-    print(stormData['Weather Event'])
-    for col in stormData:
-        print(col)
+    print(stormData)
