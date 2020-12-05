@@ -2,10 +2,12 @@
 """
 Created on Mon Nov 16 14:46:59 2020
 
-@author: dylan
+@author: Dylan Manuel (xgk011)
 """
 import numpy as np
 import pandas as pd
+
+DATA_PATH = 'Storm Data/' # Path to where all storm data files should be kept
 
 def preprocessStormData(stormFrame, keepColumns=None, additionalColumns=None):
     '''
@@ -68,15 +70,17 @@ def preprocessStormData(stormFrame, keepColumns=None, additionalColumns=None):
         if stormFrame[column].dtype == 'object':
             stormFrame[column] = stormFrame[column].str.upper()
 
-def loadMultiCSVs(*fileNames):
+def loadMultiCSVs(*fileNames, removeDups=True):
     '''
-    Loads multiple .csv files and merges the result into one DataFrame using 
-    a left outer join.
+    Loads multiple .csv files and concatenates the result into one DataFrame.
 
     Parameters
     ----------
     *fileNames : varying strings
         List of .csv file names to load.
+    removeDups : bool, optional
+        True if duplicate rows containing the exact same values on every column 
+        should be removed. The default is True.
 
     Returns
     -------
@@ -87,10 +91,8 @@ def loadMultiCSVs(*fileNames):
     df = pd.DataFrame() # DataFrame containing all the csv files
     
     for fileName in fileNames:
-        df = pd.join(pd.read_csv(fileName))
+        df = pd.concat([df, pd.read_csv(fileName)], axis=0)
+    if removeDups:
+        # Drop duplicate rows
+        df.drop_duplicates(inplace=True)
     return df
-
-if __name__ == '__main__':
-    stormData = pd.read_csv('storm_data.csv')
-    preprocessStormData(stormData)
-    print(stormData)
