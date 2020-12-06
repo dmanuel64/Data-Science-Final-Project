@@ -6,6 +6,7 @@ Created on Mon Nov 16 14:46:59 2020
 """
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 DATA_PATH = 'Storm Data/' # Path to where all storm data files should be kept
 
@@ -116,3 +117,48 @@ def loadMultiCSVs(*fileNames, removeDups=True):
         # Drop duplicate rows
         df.drop_duplicates(inplace=True)
     return df
+
+def getUsefulData(stormFrame, printPercentage=False):
+    '''
+    Gets rows from a storm DataFrame that contains any deaths, injuries, crop damage, 
+    or property damage.
+
+    Parameters
+    ----------
+    stormFrame : DataFrame
+        DataFrame to filter from.
+    printPercentage : bool, optional
+        True if the percentage of useful data should be printed. The default is False.
+
+    Returns
+    -------
+    df : DataFrame
+        DataFrame with the filtered useful information.
+
+    '''
+    df = stormFrame[(stormFrame['Direct Deaths'] > 0) | (stormFrame['Indirect Deaths'] > 0) | 
+        (stormFrame['Direct Injuries'] > 0) | (stormFrame['Indirect Injuries'] > 0) | 
+        (stormFrame['Damaged Crops'] > 0) | (stormFrame['Property Damage'] > 0)]
+    if printPercentage:
+        print('Useful Data: %0.3f%%' % (df.shape[0] / stormFrame.shape[0] * 100))
+    return df
+
+def removeUnnamedColumns(df):
+    '''
+    Removes any columns from a DataFrame that are unnamed.
+
+    Parameters
+    ----------
+    df : DataFrame
+        DataFrame to remove unnamed columns from.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame without the unnamed columns.
+
+    '''
+    return df.loc[:, ~df.columns.str.contains('^Unnamed')]
+
+def plotUsefulStats(stormFrame):
+    pass
