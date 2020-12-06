@@ -7,6 +7,7 @@ Created on Fri Dec  4 23:36:48 2020
 
 import storm_dat_utils as utils
 import os
+import matplotlib.pyplot as plt
 
 DATA_PATH = utils.DATA_PATH + 'New York Winter Data/' # Path to New York winter data
 
@@ -14,15 +15,17 @@ DATA_PATH = utils.DATA_PATH + 'New York Winter Data/' # Path to New York winter 
 dataFiles = list(map(lambda name: DATA_PATH + name, os.listdir(DATA_PATH)))
 
 winterData = utils.loadMultiCSVs(*dataFiles) # All NY winter data
-#TODO: include sleet, and winter weather,
 utils.preprocessStormData(winterData)
 # Remove any missed Unnamed columns
 winterData = utils.removeUnnamedColumns(winterData)
 # Filter for significant data
-usefulData = utils.getUsefulData(winterData, True) # Data containing deaths, injuries, or damage
+usefulData = utils.getUsefulData(winterData) # Data containing deaths, injuries, or damage
 print(usefulData.columns)
 print(usefulData.shape)
 #print(usefulData.describe())
 print(usefulData[['Direct Deaths', 'Indirect Deaths', 'Direct Injuries', 
           'Indirect Injuries', 'Property Damage', 'Damaged Crops']].sum())
 print(usefulData['Weather Event'].unique())
+
+#%% Plot bar
+utils.barUsefulData(usefulData)

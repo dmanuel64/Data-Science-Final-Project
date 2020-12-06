@@ -160,5 +160,68 @@ def removeUnnamedColumns(df):
     '''
     return df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
-def plotUsefulStats(stormFrame):
-    pass
+def barUsefulData(stormFrame, separateDamage=True, subTitle=None):
+    '''
+    Plots a stacked bar chart of deaths, injuries, and financial damage for all 
+    weather events in the DataFrame.
+
+    Parameters
+    ----------
+    stormFrame : DataFrame
+        DataFrame containing weather events.
+    separateDamage : bool, optional
+        True if there should be two separate charts for injuries/deaths and damage. 
+        The default is True.
+    subTitle : list of strings, optional
+        List of strings to replace the title(s) of the charts. The default is None.
+
+    Returns
+    -------
+    None.
+
+    '''
+    df = getUsefulData(stormFrame) # DataFrame containing useful data
+    weatherEventsTotals = {} # Dictionary of weather events containing deaths, injuries, and damage
+    weatherEvents = df['Weather Event'].unique() # List of weather events in the DataFrame
+    # Get sum of all deaths, injuries, and damage for each event and add to dictionary
+    for event in weatherEvents:
+        weatherEventsTotals[event] = [df[df['Weather Event'] == event]['Direct Injuries'].sum(), 
+                                      df[df['Weather Event'] == event]['Indirect Injuries'].sum(), 
+                                      df[df['Weather Event'] == event]['Direct Deaths'].sum(), 
+                                      df[df['Weather Event'] == event]['Indirect Deaths'].sum(), 
+                                      df[df['Weather Event'] == event]['Property Damage'].sum(), 
+                                      df[df['Weather Event'] == event]['Damaged Crops'].sum()]
+    # Plot bars
+    if not separateDamage:
+        # Plot all in one chart
+        plt.figure()
+        plt.title(subTitle[0] if subTitle != None else 'Injuries, Deaths, and Damage From Weather Events')
+        for event in sorted(weatherEventsTotals):
+            plt.bar(['Inj. (D)', 'Inj. (I)', 'Deaths (D)', 
+                     'Deaths (I)', 'P. Dmg.', 'C. Dmg.'], 
+                    weatherEventsTotals[event])
+        # Set to log scale for readability and create legend
+        plt.yscale('log')
+        plt.ylabel('Value (log)')
+        plt.legend(list(map(lambda event: event.title(), sorted(weatherEventsTotals))))
+        plt.show()
+    else:
+        # Plot injury and death chart
+        plt.figure()
+        plt.title(subTitle[0] if subTitle != None else 'Injuries and Deaths From Weather Events')
+        for event in sorted(weatherEventsTotals):
+            plt.bar(['Direct Injuries', 'Indirect Injuries', 'Direct Deaths', 
+                     'Indirect Deaths'], weatherEventsTotals[event][:4:])
+        # Create legend
+        plt.ylabel('Number of Injuries and Deaths')
+        plt.legend(list(map(lambda event: event.title(), sorted(weatherEventsTotals))))
+        plt.show()
+        # Plot property and crop damage chart
+        plt.figure()
+        plt.title(subTitle[1] if subTitle != None else 'Property and Crop Damage From Weather Events')
+        for event in sorted(weatherEventsTotals):
+            plt.bar(['Property Damage', 'Damaged Crops'], weatherEventsTotals[event][4::])
+        # Create legend
+        plt.ylabel('Damage ($)')
+        plt.legend(list(map(lambda event: event.title(), sorted(weatherEventsTotals))))
+        plt.show()
