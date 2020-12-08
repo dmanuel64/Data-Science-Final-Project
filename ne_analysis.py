@@ -20,12 +20,27 @@ utils.preprocessStormData(winterData)
 winterData = utils.removeUnnamedColumns(winterData)
 # Filter for significant data
 usefulData = utils.getUsefulData(winterData) # Data containing deaths, injuries, or damage
-print(usefulData.columns)
-print(usefulData.shape)
-#print(usefulData.describe())
-print(usefulData[['Direct Deaths', 'Indirect Deaths', 'Direct Injuries', 
-          'Indirect Injuries', 'Property Damage', 'Damaged Crops']].sum())
-print(usefulData['Weather Event'].unique())
-
-#%% Plot bar
-utils.barUsefulData(usefulData)
+#%% Plot bar chart of useful data, plot useful data over time, and print summary statistics
+utils.barUsefulData(usefulData, subTitle=['Injuries and Deaths From Winter Weather Events in NY (1995-2000)', 
+                                          'Property and Crop Damage From Winter Weather Events in NY (1995-200)'])
+# Plot injuries, deaths, and damage over time
+utils.plotStatOverTime(usefulData, 'Indirect Injuries', 
+                       subTitle='Indirect Injuries in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Number of Injuries')
+utils.plotStatOverTime(usefulData, 'Direct Injuries', 
+                       subTitle='Direct Injuries in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Number of Injuries')
+utils.plotStatOverTime(usefulData, 'Direct Deaths', 
+                       subTitle='Direct Deaths in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Number of Deaths')
+utils.plotStatOverTime(usefulData, 'Indirect Deaths', 
+                       subTitle='Indirect Deaths in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Number of Deaths')
+utils.plotStatOverTime(usefulData, 'Property Damage', 
+                       subTitle='Property Damage in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Damage ($)', logScale=True)
+utils.plotStatOverTime(usefulData, 'Damaged Crops', 
+                       subTitle='Damaged Crops in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Number of Damaged Crops', logScale=True)
+# Print summary statistics
+utils.printSummaryStats(usefulData, printColumns=['Weather Event', 'County'])

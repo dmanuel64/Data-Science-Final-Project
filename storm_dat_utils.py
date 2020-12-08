@@ -61,6 +61,7 @@ def preprocessStormData(stormFrame, keepColumns=None, additionalColumns=None,
     stormFrame.drop(remove, axis=1, inplace=True)
     # Drop columns with all cells containing NaN
     stormFrame.dropna(axis=1, inplace=True, how='all')
+    stormFrame.dropna(axis=0, inplace=True, how='all')
     # Rename column headers
     stormFrame.rename(columns={'CZ_NAME_STR' : 'County', 
                                'BEGIN_LOCATION' : 'Location', 'BEGIN_DATE' : 'Date', 
@@ -225,3 +226,87 @@ def barUsefulData(stormFrame, separateDamage=True, subTitle=None):
         plt.ylabel('Damage ($)')
         plt.legend(list(map(lambda event: event.title(), sorted(weatherEventsTotals))))
         plt.show()
+        
+def printSummaryStats(stormFrame, printColumns='all', excludeStats=[]):
+    df = getUsefulData(stormFrame) #DataFrame containing useful data
+    stats = '' # Stats to print
+    
+    # Print max stats
+    if not 'Most Indirect Injuries (One Day)' in excludeStats:
+        stats = str(df[df['Indirect Injuries'] == df['Indirect Injuries'].max()] if printColumns == 'all' \
+                    else df[df['Indirect Injuries'] == df['Indirect Injuries'].max()][printColumns + ['Indirect Injuries']])
+        print('-> Most Indirect Injuries (One Day):\n' + stats)
+    if not 'Most Direct Injuries (One Day)' in excludeStats:
+        stats = str(df[df['Direct Injuries'] == df['Direct Injuries'].max()] if printColumns == 'all' \
+                    else df[df['Direct Injuries'] == df['Direct Injuries'].max()][printColumns + ['Direct Injuries']])
+        print('-> Most Direct Injuries (One Day):\n' + stats)
+    if not 'Most Indirect Deaths (One Day)' in excludeStats:
+        stats = str(df[df['Indirect Deaths'] == df['Indirect Deaths'].max()] if printColumns == 'all' \
+        else df[df['Indirect Deaths'] == df['Indirect Deaths'].max()][printColumns + ['Indirect Deaths']])
+        print('-> Most Indirect Deaths (One Day):\n' + stats)
+    if not 'Most Direct Deaths (One Day)' in excludeStats:
+        stats = str(df[df['Direct Deaths'] == df['Direct Deaths'].max()] if printColumns == 'all' \
+        else df[df['Direct Deaths'] == df['Direct Deaths'].max()][printColumns + ['Direct Deaths']])
+        print('-> Most Direct Deaths (One Day):\n' + stats)
+    if not 'Most Property Damage (One Day)' in excludeStats:
+        stats = str(df[df['Property Damage'] == df['Property Damage'].max()] if printColumns == 'all' \
+        else df[df['Property Damage'] == df['Property Damage'].max()][printColumns + ['Property Damage']])
+        print('-> Most Property Damage (One Day):\n' + stats)
+    if not 'Most Damaged Crops (One Day)' in excludeStats:
+        stats = str(df[df['Damaged Crops'] == df['Damaged Crops'].max()] if printColumns == 'all' \
+        else df[df['Damaged Crops'] == df['Damaged Crops'].max()][printColumns + ['Damaged Crops']])
+        print('-> Most Damaged Crops (One Day):\n' + stats)
+    # TODO: Print most frequent stats
+
+def plotStatOverTime(stormFrame, stat, logScale=False, subTitle=None, subYLabel=None):
+    '''
+    Plots a storm statistic over at most a period of 70 years from 1950 to 2020 
+    on a line graph. The plot will start at the earliest weather event.
+
+    Parameters
+    ----------
+    stormFrame : DataFrame
+        DataFrame containing the statistic with dates from 1950-2020.
+    stat : string
+        Statistic to plot.
+    logScale : bool, optional
+        True if the plot should be on a log scale. The default is False.
+    subTitle : string, optional
+        An optional string to subsitute the title of the plot to. The default is None.
+    subYLabel : string, optional
+        An optional string to subsitute the y-label of the plot to. The default is None.
+
+    Returns
+    -------
+    None.
+
+    '''
+    weatherEvents = stormFrame['Weather Event'].unique() # List of weather events in the DataFrame
+    statOverTime = [] # Stat over all 70 years
+    weatherEventMinDate = 1950 # First occurence of the weather event
+    
+    def toYear(date):
+        date = str(date)
+        if '/' in date:
+            return date[date.rindex('/') + 1::]
+    
+    # Convert dates to year
+    df = getUsefulData(stormFrame.copy())
+    df['Date'] = df['Date'].apply(toYear)
+    
+    plt.figure()
+    for event in weatherEvents:
+        weatherEventMinDate = int(df['Date'].min())
+        for year in range(weatherEventMinDate, 2021, 1):
+            statOverTime.append(df[(df['Weather Event'] == event) & 
+                                    (df['Date'] == str(year))][stat].sum())
+        plt.plot(range(weatherEventMinDate, 2021, 1), statOverTime, marker='.')
+        statOverTime = []
+    # Create title and legend
+    plt.title(subTitle if not subTitle is None else stat + ' From 1950-2020')
+    if logScale:
+        plt.yscale('log')
+    plt.xlabel('Year')
+    plt.ylabel((subYLabel if not subYLabel is None else 'Value') + (' (log)' if logScale else ''))
+    plt.legend(list(map(lambda event: event.title(), weatherEvents)))
+    plt.show()
