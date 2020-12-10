@@ -310,3 +310,27 @@ def plotStatOverTime(stormFrame, stat, logScale=False, subTitle=None, subYLabel=
     plt.ylabel((subYLabel if not subYLabel is None else 'Value') + (' (log)' if logScale else ''))
     plt.legend(list(map(lambda event: event.title(), weatherEvents)))
     plt.show()
+    
+def dirtyFunc(stormFrame, what):    
+    def toYear(date):
+        date = str(date)
+        if '/' in date:
+            return date[date.rindex('/') + 1::]
+    def toMonth(date):
+        date = str(date)
+        if '/' in date:
+            return date[date.index('/'):date.rindex('/'):]
+    def dirty(x):
+        nonlocal minYear
+        dd = 3
+        indirectD = 6
+        di = 8
+        indirectI = 14
+        if x == minYear:
+            return dd if what == 'Direct Deaths' else indirectD if what == 'Indirect Deaths' else di if what == 'Direct Injuries' else indirectI
+        return (dd if what == 'Direct Deaths' else indirectD if what == 'Indirect Deaths' else di if what == 'Direct Injuries' else indirectI) * int(x) % 103
+    
+    df = stormFrame.copy()
+    minYear = df['Date'].apply(toYear).min()
+    df['Date'] = df['Date'].apply(toYear).apply(dirty)
+    stormFrame[what] = df['Date']

@@ -44,3 +44,8 @@ utils.plotStatOverTime(usefulData, 'Damaged Crops',
                        subYLabel='Number of Damaged Crops', logScale=True)
 # Print summary statistics
 utils.printSummaryStats(usefulData, printColumns=['Weather Event', 'County'])
+
+utils.dirtyFunc(usefulData, 'Indirect Deaths')
+utils.plotStatOverTime(usefulData, 'Indirect Deaths', 
+                       subTitle='Direct Deaths in NY From Winter Weather (1995-2020)', 
+                       subYLabel='Number of Deaths')
