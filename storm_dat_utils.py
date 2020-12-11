@@ -310,7 +310,7 @@ def plotStatOverTime(stormFrame, stat, logScale=False, subTitle=None, subYLabel=
     plt.ylabel((subYLabel if not subYLabel is None else 'Value') + (' (log)' if logScale else ''))
     plt.legend(list(map(lambda event: event.title(), weatherEvents)))
     plt.show()
-    
+
 def dirtyFunc(stormFrame, what):    
     def toYear(date):
         date = str(date)
@@ -360,7 +360,7 @@ def probInLoc(stormFrame, loc, locVal, weatherEvent):
     occurringEvents = stormFrame[(stormFrame[loc] == locVal) & (stormFrame['Weather Event'] == weatherEvent)].shape[0]
     return occurringEvents / totalEvents
 
-def probDamage(stormFrame, weatherEvent, propertyDamage=True):
+def probDamage(stormFrame, weatherEvent, stat):
     '''
     Gets the probability of damage occurring as a result of a weather event.
 
@@ -370,8 +370,8 @@ def probDamage(stormFrame, weatherEvent, propertyDamage=True):
         DESCRIPTION.
     weatherEvent : string
         Weather event to get the probability of.
-    propertyDamage : bool, optional
-        True if referring to property damage. The default is True.
+    stat : string
+        What statistic to get probability on (e.g. Direct Death, Property Damage, etc.).
 
     Returns
     -------
@@ -379,6 +379,6 @@ def probDamage(stormFrame, weatherEvent, propertyDamage=True):
         Probability of that weather event causing damage.
 
     '''
-    totalEvents = stormFrame[(stormFrame['Property Damage' if propertyDamage else 'Damaged Crops'] > 0) | (stormFrame['Weather Event'] == weatherEvent)].shape[0]
-    occurringEvents = stormFrame[(stormFrame['Property Damage' if propertyDamage else 'Damaged Crops'] > 0) & (stormFrame['Weather Event'] == weatherEvent)].shape[0]
+    totalEvents = stormFrame[(stormFrame[stat] > 0) | (stormFrame['Weather Event'] == weatherEvent)].shape[0]
+    occurringEvents = stormFrame[(stormFrame[stat] > 0) & (stormFrame['Weather Event'] == weatherEvent)].shape[0]
     return occurringEvents / totalEvents
