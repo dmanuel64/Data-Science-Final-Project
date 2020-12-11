@@ -334,3 +334,51 @@ def dirtyFunc(stormFrame, what):
     minYear = df['Date'].apply(toYear).min()
     df['Date'] = df['Date'].apply(toYear).apply(dirty)
     stormFrame[what] = df['Date']
+    
+def probInLoc(stormFrame, loc, locVal, weatherEvent):
+    '''
+    Gets the probabiltiy of a weather event happening in a specific location.
+
+    Parameters
+    ----------
+    stormFrame : DataFrame
+        DataFrame containing storm data.
+    loc : string
+        Column to use for location (e.g. County, Location, State).
+    locVal : string
+        Name of the location.
+    weatherEvent : string
+        Weather event to get the probability of.
+
+    Returns
+    -------
+    float
+        Probability of that weather event happening in that specific location.
+
+    '''
+    totalEvents = stormFrame[(stormFrame[loc] == locVal) | (stormFrame['Weather Event'] == weatherEvent)].shape[0]
+    occurringEvents = stormFrame[(stormFrame[loc] == locVal) & (stormFrame['Weather Event'] == weatherEvent)].shape[0]
+    return occurringEvents / totalEvents
+
+def probDamage(stormFrame, weatherEvent, propertyDamage=True):
+    '''
+    Gets the probability of damage occurring as a result of a weather event.
+
+    Parameters
+    ----------
+    stormFrame : DataFrame
+        DESCRIPTION.
+    weatherEvent : string
+        Weather event to get the probability of.
+    propertyDamage : bool, optional
+        True if referring to property damage. The default is True.
+
+    Returns
+    -------
+    float
+        Probability of that weather event causing damage.
+
+    '''
+    totalEvents = stormFrame[(stormFrame['Property Damage' if propertyDamage else 'Damaged Crops'] > 0) | (stormFrame['Weather Event'] == weatherEvent)].shape[0]
+    occurringEvents = stormFrame[(stormFrame['Property Damage' if propertyDamage else 'Damaged Crops'] > 0) & (stormFrame['Weather Event'] == weatherEvent)].shape[0]
+    return occurringEvents / totalEvents
